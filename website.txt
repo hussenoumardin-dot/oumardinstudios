@@ -1,0 +1,121 @@
+import { Link, useRouterState } from "@tanstack/react-router";
+import { Button } from "@/components/ui/button";
+import { useState, useRef, useEffect } from "react";
+import { Menu } from "lucide-react";
+
+const navLinks = [
+  { to: "/", label: "Homepage" },
+  { to: "/services", label: "Services" },
+  { to: "/approach", label: "Approach" },
+  { to: "/about", label: "About" },
+  { to: "/contact", label: "Contact" },
+] as const;
+
+function DotMenu() {
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null)
+  useRouterState({ select: (s) => s.location.pathname });
+
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    if (open) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") setOpen(false);
+      });
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [open]);
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button
+        onClick={() => setOpen(!open)}
+        aria-label="Open navigation menu"
+        className="flex items-center justify-center p-2 rounded-lg hover:bg-muted transition-colors
+              >
+        <Menu className="w-6 h-6 text-foreground" strokeWidth={2} />
+      </button>
+
+      {open && (
+        <div className="absolute right-0 top-full mt-3 w-56 rounded-xl border border-border bg-popover shadow-lg p-2 animate-in fade-in slide-in-from-top-2 duration-200">
+          <nav className="flex flex-col gap-1">
+            {navLinks.map((l) => {
+              const isActive = currentPath === l.to;
+              return (
+                <Link            key={l.to}
+                  to={l.to}
+                  onClick={() => setOpen(false)}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-primary/10 text-primary"
+                      : "text-foreground hover:bg-muted"
+                  }`}
+                  activeProps={{ className: "bg-primary/10 text-primary" }}
+                  activeOptions={{ exact: true }}
+                >
+                  <span
+                    className={`block w-2 h-2 rounded-full shrinkclassName={`block w-2 h-2 rounded-full shrink-0 ${
+                      isActive ? "bg-primary" : "bg-muted-foreground/30"
+                    }`}
+                  />
+                  {l.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+      )}
+    </div></div>
+  );
+}
+
+export function SiteHeader() {
+  return (
+    <header className="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-background/70 border-b border-border/50">
+      <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+        <Link to="/" className="flex items-center gap-2 font-semibold tracking-tight shrink-0">
+          <span className="inline-block w-2.5 h-2.5 rounded-sm bg-primary" />
+          <span className="hidden sm:inline">Oumardin Ad Studio</span>
+          <span className="sm:hidden">Oumardin Ad Studio</span></Link>
+        <div className="flex items-center gap-4">
+          <Link to="/contact" className="hidden sm:block">
+            <Button size="sm">Free Strategy</Button>
+          </Link>
+          <DotMenu />
+        </div>
+      </div>
+    </header>
+  );
+}
+
+export function SiteFooter() {
+  return (
+    <footer className="px-6 py-10 border-t border-border/50">
+      <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items<div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <span className="inline-block w-2 h-2 rounded-sm bg-primary" />
+          Oumardin Ad Studio
+        </div>
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2">
+          {navLinks.slice(1).map((l) => (
+            <Link key={l.to} to={l.to} className="hover:text-foreground transition-colors">
+              {l.label}
+            </Link>
+          ))}
+          <span className="hidden sm:inline">·</span>
+          <a href="mailto:oumardincopy@gmail.com" className="hover:text-foreground transition-colors">oumardincopy@gmail.com
+          </a>
+          <span className="hidden sm:inline">·</span>
+          <span>© {new Date().getFullYear()}</span>
+        </div>
+      </div>
+    </footer>
+  );
+}
